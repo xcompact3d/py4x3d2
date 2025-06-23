@@ -18,28 +18,45 @@ DZ=LZ/(NZ-1)
 
 RCYL=0.5
 
+#
+# Compute the radius
+#
+# Inputs : 3D vector (i,j,k) and (dx, dy, dz)
+# Output : radius for each (i,j,k) point
+#
 def get_radius(ijk, dxyz):
-
+    #
+    # Cartesian coordinates
+    #
     x = ijk[0] * dxyz[0]
     y = ijk[1] * dxyz[1]
     z = ijk[2] * dxyz[2]
-
+    #
+    # Return the associated radius
+    # FIXME origin and axis of the cylinder can change
+    #
     return (x**2 + y**2)**0.5
 
+#
+# Generate the mask associated with the cylinder
+#
+# Inputs : 3D vector (dx, dy, dz), number of points (nx, ny, nz)
+# Output : mask in a 3D array, Fortran order
+#
 def gencyl(dxyz, n, rcyl):
-
-    mask = np.zeros(n)
-    for i in range(n[0]):
-        x = i * dxyz[0]
-        for j in range(n[1]):
-            y = j * dxyz[1]
-            for k in range(n[2]):
-                z = k * dxyz[2]
-
-                r = (x**2 + y**2)**0.5
-                if (r <= rcyl):
-                    mask[i][j][k] = 1.0
-
+    #
+    # Allocate and init to zero
+    #
+    mask = np.zeros(n, order='F')
+    #
+    # One when the radius is below rcyl
+    #
+    for idx, _ in np.ndenumerate(mask):
+        if get_radius(idx, dxyz) <= rcyl:
+            mask[idx] = 1.0
+    #
+    # Done
+    #
     return mask
 
                 
