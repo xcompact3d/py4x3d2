@@ -18,13 +18,13 @@ DZ=LZ/(NZ-1)
 
 RCYL=0.5
 
-#
-# Compute the radius
-#
-# Inputs : 3D vector (i,j,k) and (dx, dy, dz)
-# Output : radius for each (i,j,k) point
-#
 def get_radius(ijk, dxyz):
+    """Computes the radius of a grid coordinate relative to the origin.
+
+    :param ijk:  The grid coordinates (i,j,k)
+    :param dxyz: The grid spacing (dx,dy,dz)
+    :return:     Radius of the point from the origin.
+    """
     #
     # Cartesian coordinates
     #
@@ -37,13 +37,14 @@ def get_radius(ijk, dxyz):
     #
     return (x**2 + y**2)**0.5
 
-#
-# Generate the mask associated with the cylinder
-#
-# Inputs : 3D vector (dx, dy, dz), number of points (nx, ny, nz)
-# Output : mask in a 3D array, Fortran order
-#
 def gencyl(dxyz, n, rcyl):
+    """Generates a mask array representing a cylinder.
+
+    :param dxyz: The grid spacing (dx,dy,dz)
+    :param n:    The grid dimensions (nx,ny,nz)
+    :param rcyl: The cylinder radius
+    :return:     Mask array of 0s for exterior points, 1s for interior points.
+    """
     #
     # Allocate and init to zero
     #
@@ -54,9 +55,7 @@ def gencyl(dxyz, n, rcyl):
     for idx, _ in np.ndenumerate(mask):
         if get_radius(idx, dxyz) <= rcyl:
             mask[idx] = 1.0
-    #
-    # Done
-    #
+    
     return mask
 
                 
