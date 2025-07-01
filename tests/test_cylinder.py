@@ -71,13 +71,13 @@ def gencyl(dxyz, n, rcyl, origin, axis):
     #
     # Allocate and init to zero
     #
-    mask = np.zeros(n, order='F')
+    mask = np.ones(n, order='F')
     #
     # One when the radius is below rcyl
     #
     for idx, _ in np.ndenumerate(mask):
         if get_grid_radius(idx, dxyz, origin, axis) <= rcyl:
-            mask[idx] = 1.0
+            mask[idx] = 0.0
     
     return mask
 
@@ -96,9 +96,9 @@ class TestMask(unittest.TestCase):
 
                     r = get_grid_radius([i, j, k], [DX, DY, DZ], [0, 0, 0], [0, 0, 1])
                     if r > RCYL:
-                        self.assertEqual(mask[i][j][k], 0.0)
-                    elif r < RCYL:
                         self.assertEqual(mask[i][j][k], 1.0)
+                    elif r < RCYL:
+                        self.assertEqual(mask[i][j][k], 0.0)
 
 # class TestDistance(unittest.TestCase):
 #     """Test that the distance from the surface is correct: exterior points are at a positive
