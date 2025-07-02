@@ -63,14 +63,19 @@ dz = args.dz
 #
 # Generate the mask
 #
-mask = np.ones((nx, ny, nz), order='F', dtype=np.double)
+mask = np.ones((nz, ny, nx), dtype=np.double)
 if args.cyl:
-    mask = mask * gencyl([dx, dy, dz], [nx, ny, nz], args.cyl[0], args.cyl[1:4], args.cyl[4:])
+    mask = mask * gencyl([dz, dy, dx], 
+                         [nz, ny, nx], 
+                         args.cyl[0], 
+                         [args.cyl[3], args.cyl[2], args.cyl[1]], 
+                         [args.cyl[6], args.cyl[5], args.cyl[4]])
 
 #
 # Ouptut to ADIOS2
 #
-with Stream("ibm.bp", "w") as s:
-    # Basic IBM
-    s.write("iibm", 1)
-    s.write("ep1", np.ascontiguousarray(mask), shape=[nx, ny, nz], start=[0,0,0], count=[nx, ny, nz], operations=None)
+if args.save:
+    with Stream("ibm.bp", "w") as s:
+        # Basic IBM
+        s.write("iibm", 1)
+        s.write("ep1", np.ascontiguousarray(mask), shape=[nx, ny, nz], start=[0,0,0], count=[nx, ny, nz], operations=None)
