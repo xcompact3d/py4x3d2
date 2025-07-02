@@ -61,8 +61,8 @@ def get_grid_radius(ijk, dxyz, origin, axis):
 def gencyl(dxyz, n, rcyl, origin, axis):
     """Generates a mask array representing a cylinder.
 
-    :param dxyz:   The grid spacing (dx,dy,dz)
-    :param n:      The grid dimensions (nx,ny,nz)
+    :param dxyz:   The grid spacing (dz,dy,dx)
+    :param n:      The grid dimensions (nz,ny,nx)
     :param rcyl:   The cylinder radius
     :param origin: The origin vector for the cylinder axis
     :param axis:   The vector along the cylinder axis
@@ -71,7 +71,7 @@ def gencyl(dxyz, n, rcyl, origin, axis):
     #
     # Allocate and init to zero
     #
-    mask = np.ones(n, order='F')
+    mask = np.ones(n)
     #
     # One when the radius is below rcyl
     #
@@ -88,17 +88,17 @@ class TestMask(unittest.TestCase):
     
     def test_x(self):
 
-        mask = gencyl([DX, DY, DZ], [NX, NY, NZ], RCYL, [0, 0, 0], [0, 0, 1])
+        mask = gencyl([DZ, DY, DX], [NZ, NY, NX], RCYL, [0, 0, 0], [1, 0, 0])
         
-        for i in range(NX):
+        for k in range(NZ):
             for j in range(NY):
-                for k in range(NZ):
+                for i in range(NX):
 
-                    r = get_grid_radius([i, j, k], [DX, DY, DZ], [0, 0, 0], [0, 0, 1])
+                    r = get_grid_radius([k, j, i], [DZ, DY, DX], [0, 0, 0], [1, 0, 0])
                     if r > RCYL:
-                        self.assertEqual(mask[i][j][k], 1.0)
+                        self.assertEqual(mask[k][j][i], 1.0)
                     elif r < RCYL:
-                        self.assertEqual(mask[i][j][k], 0.0)
+                        self.assertEqual(mask[k][j][i], 0.0)
 
 # class TestDistance(unittest.TestCase):
 #     """Test that the distance from the surface is correct: exterior points are at a positive
