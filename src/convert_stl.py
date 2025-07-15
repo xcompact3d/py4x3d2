@@ -9,6 +9,8 @@ import numpy as np
 
 from . import voxel
 
+from . import voxel
+
 def convert(stl_file):
     """ Converts an stl file into a Numpy array.
     """
