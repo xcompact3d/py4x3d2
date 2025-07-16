@@ -35,7 +35,7 @@ def run(stl_file):
     shift = [0, 0, 0]
     ibm = embed_stl.embed(voxels, mesh_n, mesh_l, shift)
 
-    shift = [13.244, -29.2215, 0]
+    shift = [-13.244, 29.2215, 0]
     ibm2 = embed_stl.embed(voxels, mesh_n, mesh_l, shift)
 
     ibm = ibm2 * ibm
