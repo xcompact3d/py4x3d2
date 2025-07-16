@@ -15,7 +15,7 @@ import src.convert_stl as convert_stl
 import src.embed_stl as embed_stl
 
 def run(stl_file):
-        
+
     # Convert STL to voxel array
     voxels = convert_stl.convert(stl_file)
 
@@ -26,10 +26,12 @@ def run(stl_file):
     print(f"Bounding box: {voxels.bounding_box()}")
     
     # Embed voxels into an IBM field
-    mesh_n = [350, 950, 215]
+    # mesh_n = [350, 950, 215]
+    mesh_n = [697, 1878, 429]
     # mesh_l = [39.6, 92.4, 236]
     # mesh_l = [72, 160, 32]
-    mesh_l = [60, 162, 37]
+    # mesh_l = [60, 162, 37]
+    mesh_l = [60.11421911, 161.97202797,  37. ]
     shift = [0, 0, 0]
     ibm = embed_stl.embed(voxels, mesh_n, mesh_l, shift)
 
@@ -60,4 +62,4 @@ def run(stl_file):
 
 if __name__ == "__main__":
     #run("/Users/paulbartholomew/DATA/mesh/stl/test_single_foil.stl")
-    run("/Users/paulbartholomew/DATA/mesh/stl/centered_wing.stl")
+    run("front_foil.stl")
