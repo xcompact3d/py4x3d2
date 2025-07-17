@@ -15,7 +15,7 @@ import src.convert_stl as convert_stl
 import src.embed_stl as embed_stl
 
 def run(stl_file):
-
+        
     # Convert STL to voxel array
     voxels = convert_stl.convert(stl_file)
 
