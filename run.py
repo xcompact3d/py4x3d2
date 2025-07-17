@@ -59,6 +59,12 @@ def run(stl_file):
             s.write("iibm", 1)
             s.write("ep1", np.ascontiguousarray(ibm), shape, start, count, operations=None)
 
+    # # For ADIOS2.10
+    # with Stream("ibm.bp", "w") as s:
+    #     # Basic IBM
+    #     s.write("iibm", 1)
+    #     s.write("ep1", np.ascontiguousarray(ibm), shape, start, count, operations=None)
+
 
 if __name__ == "__main__":
     #run("/Users/paulbartholomew/DATA/mesh/stl/test_single_foil.stl")
