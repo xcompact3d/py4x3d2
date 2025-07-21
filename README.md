@@ -12,3 +12,8 @@ There are currently two mask generators:
 `py4x3d2` depends on `ADIOS2` to write the IBM mask for loading into `x3d2`.
 
 To read `stl` files `py4x3d2` depends on `stl-to-voxel`, installable via `pip`.
+
+## Current limitations
+
+The `stl` reader currently hardcodes the `stl` file and `x3d2` mesh in `run.py` and the voxel
+resolution in `src/convert_stl.py`, users should edit these before running to suit their needs.

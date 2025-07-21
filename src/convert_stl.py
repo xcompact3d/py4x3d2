@@ -50,6 +50,9 @@ def convert(stl_file):
     # - vol:   The voxel grid
     # - scale: The number of voxels per unit length
     # - shift: The distance from the origin to the mesh centre
-    vol, scale, shift = stv.convert_meshes([org_mesh], 350, None, False)
+    # TODO: Currently the voxel resolution is hardcoded, in future this could be determined in
+    #       combination with the x3d2 mesh resolution.
+    resolution = 400
+    vol, scale, shift = stv.convert_meshes([org_mesh], resolution, None, False)
 
     return voxel.Voxels(vol, scale, shift)
