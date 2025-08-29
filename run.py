@@ -24,28 +24,47 @@ def run(stl_file):
     print(f"Voxel size: {1 / voxels.scale}")
     print(f"Voxel count: {voxels.count()}")
     print(f"Bounding box: {voxels.bounding_box()}")
-    
+
     # Embed voxels into an IBM field
-    # mesh_n = [350, 950, 215]
+    mesh_n = [350, 950, 215] # nx, ny, nz
     mesh_n = [697, 1878, 429]
     # mesh_l = [39.6, 92.4, 236]
     # mesh_l = [72, 160, 32]
     # mesh_l = [60, 162, 37]
-    mesh_l = [60.11421911, 161.97202797,  37. ]
-    shift = [0, 0, 0]
-    ibm = embed_stl.embed(voxels, mesh_n, mesh_l, shift)
+    mesh_l = [60.11421911, 161.97202797, 37.0]  # Lx, Ly, Lz
 
-    shift = [-13.244, 29.2215, 0]
-    ibm2 = embed_stl.embed(voxels, mesh_n, mesh_l, shift)
 
-    ibm = ibm2 * ibm
+    # get the geometric centre of the original stl object
+    bbox_min, bbox_max = voxels.bounding_box()
+    stl_centre = (bbox_min + bbox_max) / 2.0
+
+    # define the desired centre for the entire two-foil system
+    system_centre = np.array([
+        mesh_l[0] / 2.0,
+        mesh_l[1] / 2.0,
+        mesh_l[2] / 2.0
+    ])
+
+    # use relative shift
+    relative_offset = np.array([-13.244, 29.2215, 0.0])
+
+    # calculate the final absolute positions for each foil's centre
+    centre_pos_1 = system_centre - relative_offset / 2.0
+    centre_pos_2 = system_centre + relative_offset / 2.0
+
+    # embed first foil at its final calculated position
+    ibm1 = embed_stl.embed(voxels, mesh_n, mesh_l, centre_pos_1)
+
+    # embed second foil at its final calculated position
+    ibm2 = embed_stl.embed(voxels, mesh_n, mesh_l, centre_pos_2)
+
+    # combine the masks
+    ibm_final = ibm1 * ibm2
+
+    # shape of the numpy array is (nz, ny, nx)
+    nz, ny, nx = ibm_final.shape
     
-    # Write voxel array using ADIOS2
-    nx = ibm.shape[0]
-    ny = ibm.shape[1]
-    nz = ibm.shape[2]
-
-    shape = [nx, ny, nz]
+    shape = [nz, ny, nx]
     start = [0, 0, 0]
     count = [nx, ny, nz]
 
@@ -67,5 +86,4 @@ def run(stl_file):
 
 
 if __name__ == "__main__":
-    #run("/Users/paulbartholomew/DATA/mesh/stl/test_single_foil.stl")
     run("front_foil.stl")

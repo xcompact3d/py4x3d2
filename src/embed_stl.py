@@ -1,4 +1,4 @@
-""" src/embed_voxels.py
+""" src/embed_stl.py
 
 Module to embed voxels representing a geometry as an IBM field array.
 """
@@ -8,57 +8,66 @@ import numpy as np
 def embed(voxels, mesh_n, mesh_l, shift=[0, 0, 0]):
     """Embeds the voxel data as an IBM within a mesh."""
 
-    nx = mesh_n[0]
-    ny = mesh_n[1]
-    nz = mesh_n[2]
+    nx, ny, nz = mesh_n
+    dx = mesh_l[0] / (nx - 1) if nx > 1 else 0
+    dy = mesh_l[1] / (ny - 1) if ny > 1 else 0
+    dz = mesh_l[2] / (nz - 1) if nz > 1 else 0
 
-    dx = mesh_l[0] / (nx - 1)
-    dy = mesh_l[1] / (ny - 1)
-    dz = mesh_l[2] / (nz - 1)
+    # calculate center of the voxel object from its bounding box
+    bbox_min, bbox_max = voxels.bounding_box()
+    voxel_center = (bbox_min + bbox_max) / 2.0
 
-    n0, nn = _bounds(voxels, mesh_n, [dx, dy, dz], shift)
-    print(f"Working range {n0} : {nn}")
+    # calculate the offset vector needed to move the voxel's center
+    # to the desired final 'shift' location in the domain.
+    offset = np.array(shift) - voxel_center
+
+    # determine the loop bounds in the final grid using the correct offset
+    n0, nn = _bounds(voxels, mesh_n, [dx, dy, dz], offset)
+    print(f"Working range (indices): {n0} -> {nn}")
+
+    # initialise ibm mask
+    ibm = np.ones([nz, ny, nx], dtype=np.float64)
     
-    ibm = np.ones([nz, ny, nx], dtype=np.double)
-    nxyz = np.prod(nn - n0)
-    ctr = 0
-    workfrac = 0
+    # loop over the relevant part of the grid
     for k in range(n0[2], nn[2]):
         for j in range(n0[1], nn[1]):
             for i in range(n0[0], nn[0]):
-                x = i * dx - shift[0]
-                y = j * dy - shift[1]
-                z = k * dz - shift[2]
+                # current grid point's coordinate in the global frame
+                x_global = np.array([i * dx, j * dy, k * dz])
 
-                # Zero out the embedded body in the mask
-                if voxels.query([x, y, z]) > 0:
-                    ibm[k,j,i] = 0.0
+                # transform this global coordinate to the local frame of the voxel object
+                x_local = x_global - offset
 
-                if ctr > (workfrac / 100.0) * nxyz:
-                    print(f"{workfrac}%")
-                    workfrac += 10
-                ctr += 1
+                # query the voxel object with the correct local coordinate
+                if voxels.query(x_local) > 0:
+                    ibm[k, j, i] = 0.0
 
     return ibm
 
-def _bounds(voxels, nxyz, dxyz, shift):
-    """Determines the loop bounds for embedding"""
+def _bounds(voxels, nxyz, dxyz, offset):
+    """Determines the loop bounds for embedding using the correct offset."""
 
     x0, xn = voxels.bounding_box()
-    x0 = x0 + np.array(shift)
-    xn = xn + np.array(shift)
 
-    print(x0)
-    print(xn)
+    # apply calculated offset to find the final position in the global frame
+    x0_global = x0 + offset
+    xn_global = xn + offset
 
-    n0 = np.floor(x0 / np.array(dxyz)).astype(int)
-    nn = np.floor(xn / np.array(dxyz)).astype(int)
+    # convert the final physical coordinates to grid indices
+    # handle dxyz=0 for 2D cases to avoid division by zero
+    dxyz_safe = np.array([d if d > 0 else 1 for d in dxyz])
+    n0 = np.floor(x0_global / dxyz_safe).astype(int)
 
-    print(n0)
-    print(nn)
+    # use ceiling for the upper bound to ensure the whole object is included
+    nn = np.ceil(xn_global / dxyz_safe).astype(int)
 
-    for i in range(3):
-        n0[i] = max(n0[i], 0)
-        nn[i] = min(nn[i], nxyz[i])
+    # clamp the indices to be within the valid grid range
+    nx, ny, nz = nxyz
+    n0[0] = max(n0[0], 0)
+    n0[1] = max(n0[1], 0)
+    n0[2] = max(n0[2], 0)
+    nn[0] = min(nn[0], nx)
+    nn[1] = min(nn[1], ny)
+    nn[2] = min(nn[2], nz)
 
     return [n0, nn]
