@@ -15,7 +15,6 @@ import src.convert_stl as convert_stl
 import src.embed_stl as embed_stl
 
 def run(stl_file):
-        
     # Convert STL to voxel array
     voxels = convert_stl.convert(stl_file)
 
@@ -27,7 +26,7 @@ def run(stl_file):
 
     # Embed voxels into an IBM field
     mesh_n = [350, 950, 215] # nx, ny, nz
-    mesh_n = [697, 1878, 429]
+    # mesh_n = [697, 1878, 429]
     # mesh_l = [39.6, 92.4, 236]
     # mesh_l = [72, 160, 32]
     # mesh_l = [60, 162, 37]
@@ -59,21 +58,21 @@ def run(stl_file):
     ibm2 = embed_stl.embed(voxels, mesh_n, mesh_l, centre_pos_2)
 
     # combine the masks
-    ibm_final = ibm1 * ibm2
+    ibm = ibm1 * ibm2
 
     # shape of the numpy array is (nz, ny, nx)
-    nz, ny, nx = ibm_final.shape
+    nz, ny, nx = ibm.shape
     
     shape = [nz, ny, nx]
     start = [0, 0, 0]
-    count = [nx, ny, nz]
+    count = [nz, ny, nx]
 
     if not adios2_new_api:
         with adios2.open("test.bp4", "w") as fh:
             fh.write("iibm", np.array([1]))
             fh.write("ep1", np.ascontiguousarray(ibm), shape, start, count)
     else:
-        with Stream("ibm.bp4", "w") as s:
+        with Stream("ibm.bp", "w") as s:
             # Basic IBM
             s.write("iibm", 1)
             s.write("ep1", np.ascontiguousarray(ibm), shape, start, count, operations=None)
