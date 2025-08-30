@@ -1,4 +1,4 @@
-""" src/embed_stl.py
+""" src/embed_voxels.py
 
 Module to embed voxels representing a geometry as an IBM field array.
 """
@@ -25,10 +25,7 @@ def embed(voxels, mesh_n, mesh_l, shift=[0, 0, 0]):
     n0, nn = _bounds(voxels, mesh_n, [dx, dy, dz], offset)
     print(f"Working range (indices): {n0} -> {nn}")
 
-    # initialise ibm mask
     ibm = np.ones([nz, ny, nx], dtype=np.float64)
-    
-    # loop over the relevant part of the grid
     for k in range(n0[2], nn[2]):
         for j in range(n0[1], nn[1]):
             for i in range(n0[0], nn[0]):
@@ -38,7 +35,7 @@ def embed(voxels, mesh_n, mesh_l, shift=[0, 0, 0]):
                 # transform this global coordinate to the local frame of the voxel object
                 x_local = x_global - offset
 
-                # query the voxel object with the correct local coordinate
+                # Zero out the embedded body in the mask
                 if voxels.query(x_local) > 0:
                     ibm[k, j, i] = 0.0
 
@@ -49,19 +46,14 @@ def _bounds(voxels, nxyz, dxyz, offset):
 
     x0, xn = voxels.bounding_box()
 
-    # apply calculated offset to find the final position in the global frame
     x0_global = x0 + offset
     xn_global = xn + offset
 
-    # convert the final physical coordinates to grid indices
-    # handle dxyz=0 for 2D cases to avoid division by zero
     dxyz_safe = np.array([d if d > 0 else 1 for d in dxyz])
     n0 = np.floor(x0_global / dxyz_safe).astype(int)
 
-    # use ceiling for the upper bound to ensure the whole object is included
     nn = np.ceil(xn_global / dxyz_safe).astype(int)
 
-    # clamp the indices to be within the valid grid range
     nx, ny, nz = nxyz
     n0[0] = max(n0[0], 0)
     n0[1] = max(n0[1], 0)
