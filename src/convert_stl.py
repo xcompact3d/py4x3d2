@@ -9,8 +9,6 @@ import numpy as np
 
 from . import voxel
 
-from . import voxel
-
 def convert(stl_file):
     """ Converts an stl file into a Numpy array.
     """
@@ -54,7 +52,7 @@ def convert(stl_file):
     # - shift: The distance from the origin to the mesh centre
     # TODO: Currently the voxel resolution is hardcoded, in future this could be determined in
     #       combination with the x3d2 mesh resolution.
-    resolution = 400
+    resolution = 350
     vol, scale, shift = stv.convert_meshes([org_mesh], resolution, None, False)
 
     return voxel.Voxels(vol, scale, shift)
