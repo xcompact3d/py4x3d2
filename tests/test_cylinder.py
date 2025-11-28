@@ -68,17 +68,18 @@ def gencyl(dxyz, n, rcyl, origin, axis):
     :param axis:   The vector along the cylinder axis
     :return:       Mask array of 0s for exterior points, 1s for interior points.
     """
-    #
-    # Allocate and init to zero
-    #
-    mask = np.ones(n)
-    #
-    # One when the radius is below rcyl
-    #
-    for idx, _ in np.ndenumerate(mask):
-        if get_grid_radius(idx, dxyz, origin, axis) <= rcyl:
-            mask[idx] = 0.0
-    
+    k, j, i = np.indices(n)
+
+    p = np.stack([k * dxyz[0], j * dxyz[1], i * dxyz[2]], axis=-1)
+
+    p0 = np.array(origin)
+    u = np.array(axis)
+
+    c = np.cross(p - p0, u)
+    distance = np.linalg.norm(c, axis=-1) / np.linalg.norm(u)
+
+    mask = np.where(distance <= rcyl, 0.0, 1.0)
+
     return mask
 
                 
