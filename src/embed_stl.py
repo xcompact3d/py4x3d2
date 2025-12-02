@@ -1,4 +1,4 @@
-""" src/embed_voxels.py
+""" src/embed_stl.py
 
 Module to embed voxels representing a geometry as an IBM field array.
 """
@@ -29,13 +29,10 @@ def embed(voxels, mesh_n, mesh_l, shift=[0, 0, 0]):
     for k in range(n0[2], nn[2]):
         for j in range(n0[1], nn[1]):
             for i in range(n0[0], nn[0]):
-                # current grid point's coordinate in the global frame
                 x_global = np.array([i * dx, j * dy, k * dz])
 
-                # transform this global coordinate to the local frame of the voxel object
                 x_local = x_global - offset
 
-                # Zero out the embedded body in the mask
                 if voxels.query(x_local) > 0:
                     ibm[k, j, i] = 0.0
 
@@ -49,6 +46,8 @@ def _bounds(voxels, nxyz, dxyz, offset):
     x0_global = x0 + offset
     xn_global = xn + offset
 
+    # convert the final physical coordinates to grid indices
+    # handle dxyz=0 for 2D cases to avoid division by zero
     dxyz_safe = np.array([d if d > 0 else 1 for d in dxyz])
     n0 = np.floor(x0_global / dxyz_safe).astype(int)
 

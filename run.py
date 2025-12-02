@@ -18,20 +18,23 @@ def run(stl_file):
     # Convert STL to voxel array
     voxels = convert_stl.convert(stl_file)
 
-    print(f"Object dimensions: {voxels.dims()}")
-    print(f"Voxel scale: {voxels.scale}")
+    print(f"Model dimensions: {voxels.L}")
+    print(f"Model scale: {voxels.scale}")
     print(f"Voxel size: {1 / voxels.scale}")
-    print(f"Voxel count: {voxels.count()}")
+    print(f"Voxel count: {voxels.n}")
     print(f"Bounding box: {voxels.bounding_box()}")
 
     # Embed voxels into an IBM field
-    mesh_n = [350, 950, 215] # nx, ny, nz
-    # mesh_n = [697, 1878, 429]
+    # mesh_n = [350, 950, 215]
+    # mesh_n = [608, 1632, 384]
+    mesh_n = [697, 1878, 429] # nx, ny, nz
+    ratio = 1
+    mesh_n = [697/ratio, 1878/ratio, 429/ratio]
+    mesh_n = [ int(a) for a in mesh_n ]
     # mesh_l = [39.6, 92.4, 236]
     # mesh_l = [72, 160, 32]
     # mesh_l = [60, 162, 37]
     mesh_l = [60.11421911, 161.97202797, 37.0]  # Lx, Ly, Lz
-
 
     # get the geometric centre of the original stl object
     bbox_min, bbox_max = voxels.bounding_box()
@@ -77,12 +80,7 @@ def run(stl_file):
             s.write("iibm", 1)
             s.write("ep1", np.ascontiguousarray(ibm), shape, start, count, operations=None)
 
-    # # For ADIOS2.10
-    # with Stream("ibm.bp", "w") as s:
-    #     # Basic IBM
-    #     s.write("iibm", 1)
-    #     s.write("ep1", np.ascontiguousarray(ibm), shape, start, count, operations=None)
-
+    print("\nSuccessfully generated clean ibm.bp file.")
 
 if __name__ == "__main__":
     run("front_foil.stl")
