@@ -1,0 +1,7 @@
+# core libraries
+numpy
+adios2
+
+# stl manipulation and voxelisation
+numpy-stl
+stl-to-voxel
