@@ -78,4 +78,7 @@ if args.save:
     with Stream("ibm.bp", "w") as s:
         # Basic IBM
         s.write("iibm", 1)
-        s.write("ep1", np.ascontiguousarray(mask), shape=[nx, ny, nz], start=[0,0,0], count=[nx, ny, nz], operations=None)
+
+        # describe array using python dimensions (z, y, x)
+        # adios will automatically map this to fortran's (x, y, z)
+        s.write("ep1", np.ascontiguousarray(mask), shape=[nz, ny, nx], start=[0,0,0], count=[nz, ny, nx], operations=None)
