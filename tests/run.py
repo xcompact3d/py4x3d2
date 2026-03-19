@@ -16,7 +16,6 @@ default_dy = default_dx
 default_dz = default_dx
 default_save = True
 default_verbose = True
-output = "ibm"
 
 #
 # Process arguments
@@ -39,6 +38,13 @@ parser.add_argument('--cyl', nargs=7,
 args = parser.parse_args()
 
 #
+# Build output filename from parity of nx, ny, nz
+# Each digit is '1' if the dimension is odd, '0' if even
+#
+parity = lambda n: '1' if n % 2 != 0 else '0'
+output = f"ibm_{parity(nx)}{parity(ny)}{parity(nz)}"
+
+#
 # Print some stuff
 #
 if args.verbose:
@@ -48,6 +54,7 @@ if args.verbose:
     print("  Number of cells : " + str(args.nx) + " " + str(args.ny) + " " + str(args.nz))
     print("  Generate the IBM input : " + str(args.save))
     print("  Cylinder : " + str(args.cyl))
+    print("  Output file : " + output + ".bp")
 
 #
 # Parameters
@@ -75,7 +82,7 @@ if args.cyl:
 # Ouptut to ADIOS2
 #
 if args.save:
-    with Stream("ibm.bp", "w") as s:
+    with Stream(f"{output}.bp", "w") as s:
         # Basic IBM
         s.write("iibm", 1)
 
